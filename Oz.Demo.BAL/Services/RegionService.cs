@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Oz.Demo.BAL.Model;
 using Oz.Demo.DAL.Repositories;
 using Oz.Demo.DAL.Model;
+using System.Data.Entity;
 
 namespace Oz.Demo.BAL.Services
 {
@@ -18,16 +19,26 @@ namespace Oz.Demo.BAL.Services
         {
             _repoFactory = repoFactory;
         }
-        public void Create(RegionModel model)
+        public async Task CreateAsync(RegionModel model)
         {
             ThrowIfNotInit();
-            _regionRepo.Save(model.SetModel(null));
+            await _regionRepo.SaveAsync(model.SetModel(null));
         }
 
-        public IEnumerable<RegionModel> Get(bool? nameSort = default(bool?), bool? timeZoneSort = default(bool?))
+        public async Task DeleteAsync(int id)
         {
             ThrowIfNotInit();
-            var result = _regionRepo.All();
+            var item = await _regionRepo.GetAsync(id);
+            if (item != null)
+            {
+                await _regionRepo.DeleteAsync(item);
+            }
+        }
+
+        public async Task<IEnumerable<RegionModel>> GetAsync(bool? nameSort = default(bool?), bool? timeZoneSort = default(bool?))
+        {
+            ThrowIfNotInit();
+            var result = _regionRepo.All().Where(o=>!o.IsDeleted);
             if (nameSort.HasValue)
             {
                 if (nameSort.Value)
@@ -40,15 +51,25 @@ namespace Oz.Demo.BAL.Services
                     result = result.OrderBy(o => o.TimeZone);
                 else result = result.OrderByDescending(o => o.TimeZone);
             }
-            return result.ToList().Select(o => new RegionModel(o));
+            var asyncResult = await result.ToListAsync();
+            return asyncResult.Select(o => new RegionModel(o));
         }
 
-        public void Update(RegionModel model)
+        public async Task<RegionModel> GetByIdAsync(int id)
         {
             ThrowIfNotInit();
-            var toUpdate = _regionRepo.Get(model.Id);
+            var result = await _regionRepo.GetAsync(id);
+            if (result != null && !result.IsDeleted)
+                return new RegionModel(result);
+            else return null;
+        }
+
+        public async Task UpdateAsync(RegionModel model)
+        {
+            ThrowIfNotInit();
+            var toUpdate = await _regionRepo.GetAsync(model.Id);
             model.SetModel(toUpdate);
-            _regionRepo.Save(toUpdate);            
+            await _regionRepo.SaveAsync(toUpdate);            
         }
 
         protected override void InternalInit(string activeUser)

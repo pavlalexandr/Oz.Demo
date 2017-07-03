@@ -11,12 +11,12 @@ namespace Oz.Demo.BAL
     {
         protected bool _initialized;
         public bool Initialized => _initialized;
-        protected abstract void InternalInit(string activeUser);
+        protected abstract void InternalInit(string activeUser);        
         public void Init(string activeUser)
         {
             InternalInit(activeUser);
             _initialized = true;
-        }
+        }       
         public void ThrowIfNotInit()
         {
             if (!Initialized) throw new NotInitializedException();
@@ -29,5 +29,7 @@ namespace Oz.Demo.BAL
                     service.Init(activeUser);
             }
         }
+
+        
     }
 }

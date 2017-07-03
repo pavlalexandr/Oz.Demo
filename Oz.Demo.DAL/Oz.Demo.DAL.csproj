@@ -47,6 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Migrations\201707021507031_init_migration.cs" />
+    <Compile Include="Migrations\201707021507031_init_migration.Designer.cs">
+      <DependentUpon>201707021507031_init_migration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\OzDemoDbContext.cs" />
     <Compile Include="Model\Record.cs" />
     <Compile Include="Model\Region.cs" />
@@ -62,6 +67,10 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201707021507031_init_migration.resx">
+      <DependentUpon>201707021507031_init_migration.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

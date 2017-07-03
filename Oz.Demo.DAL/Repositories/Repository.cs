@@ -15,6 +15,7 @@ using System.ComponentModel;
 using System.Data.Entity.Core.Mapping;
 using System.Configuration;
 using Oz.Demo.DAL.Model;
+using System.Data.Entity;
 
 namespace Oz.Demo.DAL.Repositories
 {
@@ -69,6 +70,11 @@ namespace Oz.Demo.DAL.Repositories
             return DbContext.Set<T>().FirstOrDefault(o => o.ID==id);
         }
 
+        public virtual async Task<T> GetAsync(int id)
+        {
+            return await DbContext.Set<T>().FirstOrDefaultAsync(o => o.ID == id);
+        }
+
         public virtual void Save(T itemToSave)
         {           
             if (itemToSave.ID == 0)
@@ -85,6 +91,22 @@ namespace Oz.Demo.DAL.Repositories
             }
             SaveChanges();
         }
+        public virtual async Task SaveAsync(T itemToSave)
+        {
+            if (itemToSave.ID == 0)
+            {
+                itemToSave.CreatedBy = ActiveUser;
+                itemToSave.Created = DateTime.Now;
+                DbContext.Entry(itemToSave).State = System.Data.Entity.EntityState.Added;
+            }
+            else
+            {
+                itemToSave.Updated = DateTime.Now;
+                itemToSave.UpdatedBy = ActiveUser;
+                DbContext.Entry(itemToSave).State = System.Data.Entity.EntityState.Modified;
+            }
+            await SaveChangesAsync();
+        }
 
         public virtual void Delete(T itemToSave)
         {
@@ -96,6 +118,17 @@ namespace Oz.Demo.DAL.Repositories
                 DbContext.Entry(itemToSave).State = System.Data.Entity.EntityState.Modified;
                 SaveChanges();
             }            
+        }
+        public virtual async Task DeleteAsync(T itemToSave)
+        {
+            if (itemToSave.ID != 0)
+            {
+                itemToSave.IsDeleted = true;
+                itemToSave.Deleted = DateTime.Now;
+                itemToSave.DeletedBy = ActiveUser;
+                DbContext.Entry(itemToSave).State = System.Data.Entity.EntityState.Modified;
+                await SaveChangesAsync();
+            }
         }
 
         //protected virtual bool GetFieldByName(T obj, M id, string idFieldName)
@@ -161,11 +194,30 @@ namespace Oz.Demo.DAL.Repositories
                 DbContext.SaveChanges();
             }
         }
+        private async Task SaveChangesAsync()
+        {
+            try
+            {
+                await DbContext.SaveChangesAsync();
+            }
+            catch (OptimisticConcurrencyException)
+            {
+                await RefreshContextAsync();
+                await DbContext.SaveChangesAsync();
+            }
+        }
         private void RefreshContext()
         {
             var ctx = ((IObjectContextAdapter)DbContext).ObjectContext;
             ctx.Refresh(System.Data.Entity.Core.Objects.RefreshMode.ClientWins, DbContext.Set<T>());
         }
+
+        private async Task RefreshContextAsync()
+        {
+            var ctx = ((IObjectContextAdapter)DbContext).ObjectContext;
+            await ctx.RefreshAsync(System.Data.Entity.Core.Objects.RefreshMode.ClientWins, DbContext.Set<T>());
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
         private string GetTableName<S>() where S : class
         {

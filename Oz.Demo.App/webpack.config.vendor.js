@@ -25,13 +25,21 @@ module.exports = (env) => {
                 '@angular/platform-browser',
                 '@angular/platform-browser-dynamic',
                 '@angular/router',
+                'jquery',
                 'bootstrap',
                 'bootstrap/dist/css/bootstrap.css',
                 'es6-shim',
                 'es6-promise',
-                'event-source-polyfill',
-                'jquery',
+                'event-source-polyfill',                
                 'zone.js',
+                'alertifyjs/build/css/alertify.min.css',
+                'alertifyjs/build/css/themes/default.min.css',
+                'alertifyjs/build/alertify'
+                //'ng2-smart-table'
+                //,
+                //'ag-grid/dist/styles/theme-fresh.css',
+                //'ag-grid-angular/main',
+                //'ag-grid-enterprise/main'
             ]
         },
         output: {

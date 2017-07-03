@@ -9,6 +9,6 @@ namespace Oz.Demo.BAL
     public interface IInitializable
     {
         bool Initialized { get; }
-        void Init(string activeUser);
+        void Init(string activeUser);        
     }
 }

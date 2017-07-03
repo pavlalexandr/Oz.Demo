@@ -10,8 +10,10 @@ namespace Oz.Demo.BAL.Intrefaces
 {
     public interface IRegionService: IInitializable
     {
-        IEnumerable<RegionModel> Get(bool? nameSort = null, bool? timeZoneSort = null);
-        void Create(RegionModel model);
-        void Update(RegionModel model);
+        Task<IEnumerable<RegionModel>> GetAsync(bool? nameSort = null, bool? timeZoneSort = null);
+        Task CreateAsync(RegionModel model);
+        Task UpdateAsync(RegionModel model);
+        Task DeleteAsync(int id);
+        Task<RegionModel> GetByIdAsync(int id);
     }
 }
